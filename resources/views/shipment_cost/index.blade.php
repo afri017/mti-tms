@@ -34,8 +34,8 @@
                 <div class="col-md-2">
                     <select name="active" class="form-control form-control-sm">
                         <option value="">-- Semua Status --</option>
-                        <option value="1" {{ request('active')==='1' ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ request('active')==='0' ? 'selected' : '' }}>Inactive</option>
+                        <option value="Y" {{ request('active')==='Y' ? 'selected' : '' }}>Active</option>
+                        <option value="N" {{ request('active')==='N' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -83,7 +83,7 @@
                                 </small>
                             </td>
                             <td class="text-center">
-                                @if($sc->active)
+                                @if(($sc->active)==='Y')
                                     <span class="badge bg-success">Active</span>
                                 @else
                                     <span class="badge bg-danger">Inactive</span>

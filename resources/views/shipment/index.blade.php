@@ -147,7 +147,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">No shipment data found.</td>
+                                <td colspan="15" class="text-center text-muted">No shipment data found.</td>
                             </tr>
                         @endforelse
                     </tbody>
