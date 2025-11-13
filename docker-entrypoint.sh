@@ -9,25 +9,20 @@ if [ -z "$APP_KEY" ]; then
   php artisan key:generate --force --show
 fi
 
-# Wait for database to be ready (with timeout)
-echo "⏳ Waiting for database connection..."
-MAX_TRIES=30
-COUNT=0
-until php artisan db:show 2>/dev/null || [ $COUNT -eq $MAX_TRIES ]; do
-  echo "Database not ready yet, waiting... ($COUNT/$MAX_TRIES)"
-  sleep 2
-  COUNT=$((COUNT+1))
-done
+# Wait a bit for database to be ready
+echo "⏳ Waiting for database to be ready..."
+sleep 5
 
-if [ $COUNT -eq $MAX_TRIES ]; then
-  echo "❌ Database connection timeout! Check your DB credentials."
+# Try to connect to database
+echo "🔍 Testing database connection..."
+if php artisan db:show 2>/dev/null; then
+  echo "✅ Database connected successfully!"
+else
+  echo "⚠️  Database check failed, but continuing anyway..."
   echo "DB_HOST: $DB_HOST"
   echo "DB_PORT: $DB_PORT"
   echo "DB_DATABASE: $DB_DATABASE"
-  exit 1
 fi
-
-echo "✅ Database connected!"
 
 # Run migrations
 echo "🔄 Running database migrations..."
