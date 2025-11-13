@@ -67,7 +67,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{ route('home') }}" class="brand-link">
-      <img src="{{ asset('dist/img/Admin.png') }}" alt="Admin" class="brand-image " style="opacity: .8"> <!-- src="../dist/img/logo-ipc-1.png" -->
+      <img src="{{ asset('dist/img/logo-ipc-1.png') }}" alt="Admin" class="brand-image " style="opacity: .8"> <!-- src="../dist/img/logo-ipc-1.png"  {{ asset('dist/img/Admin.png') }}-->
       <span class="brand-text font-weight-light">MTI</span>
     </a>
 
@@ -76,7 +76,7 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="{{ asset('dist/img/user8-128x128.jpg') }}" class="img-circle elevation-3" alt="User Image">
+          <img src="{{ asset('dist/img/' . Auth::user()->gambar) }}" class="img-circle elevation-3" alt="User Image">
         </div>
         <div class="info">
           <a href="#" class="d-block">{{ Auth::user()->name }}</a>
@@ -418,7 +418,7 @@
 
   <!-- Main Footer -->
   <footer class="main-footer">
-    <strong>Copyright &copy; 2024 <a href="https://mtimultiscm.co.id/">MTI</a>.</strong>
+    <strong>Copyright &copy; 2026 <a href="https://mtimultiscm.co.id/">MTI</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
       <b>Version</b> 1.0.0
