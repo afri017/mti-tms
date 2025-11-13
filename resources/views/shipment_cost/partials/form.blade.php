@@ -52,6 +52,7 @@
 
     <div class="col-md-3 mt-3">
         <label>Active</label><br>
-        <input type="checkbox" name="active" value="Y" {{ old('active', $shipmentCost->active ?? false) ? 'checked' : '' }}>
+        <input type="hidden" name="active" value="">
+        <input type="checkbox" name="active" value="Y" {{ old('active', $shipmentCost->active ?? '') == 'Y' ? 'checked' : '' }}>
     </div>
 </div>

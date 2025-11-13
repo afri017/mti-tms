@@ -40,10 +40,14 @@ class ShipmentCostController extends Controller
             'price_driver' => 'required|numeric',
             'validity_start' => 'required|date',
             'validity_end' => 'required|date|after_or_equal:validity_start',
-            'active' => 'boolean',
+            'active' => 'nullable|in:Y,',
         ]);
 
-        ShipmentCost::create($request->all());
+        // Handle checkbox: convert empty string to null
+        $data = $request->all();
+        $data['active'] = $request->input('active') === 'Y' ? 'Y' : null;
+
+        ShipmentCost::create($data);
 
         return redirect()->route('shipment_cost.index')->with('success', 'Shipment Cost berhasil ditambahkan.');
     }
@@ -67,11 +71,15 @@ class ShipmentCostController extends Controller
             'price_driver' => 'required|numeric',
             'validity_start' => 'required|date',
             'validity_end' => 'required|date|after_or_equal:validity_start',
-            'active' => 'boolean',
+            'active' => 'nullable|in:Y,',
         ]);
 
+        // Handle checkbox: convert empty string to null
+        $data = $request->all();
+        $data['active'] = $request->input('active') === 'Y' ? 'Y' : null;
+
         $shipmentCost = ShipmentCost::findOrFail($id);
-        $shipmentCost->update($request->all());
+        $shipmentCost->update($data);
 
         return redirect()->route('shipment_cost.index')->with('success', 'Shipment Cost berhasil diperbarui.');
     }
