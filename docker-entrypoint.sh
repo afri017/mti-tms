@@ -31,15 +31,36 @@ echo "✅ Database connected!"
 
 # Run migrations
 echo "🔄 Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force || {
+  echo "⚠️  Migration failed, but continuing..."
+}
+
+# Clear all caches first
+echo "🧹 Clearing caches..."
+php artisan cache:clear || true
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
 
 # Cache optimization
 echo "⚡ Optimizing Laravel..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan config:cache || {
+  echo "⚠️  Config cache failed, skipping..."
+}
+php artisan route:cache || {
+  echo "⚠️  Route cache failed, skipping..."
+}
+php artisan view:cache || {
+  echo "⚠️  View cache failed, skipping..."
+}
+
+# Set storage permissions at runtime
+echo "🔐 Setting storage permissions..."
+chmod -R 777 storage bootstrap/cache || true
 
 echo "✨ Application ready!"
+echo "Environment: $APP_ENV"
+echo "Debug mode: $APP_DEBUG"
 
 # Start Laravel server
 exec php artisan serve --host=0.0.0.0 --port=8000

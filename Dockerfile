@@ -22,8 +22,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
 
 # Set permissions untuk storage dan cache
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 8000
 
