@@ -33,6 +33,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Gambar</th>
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Dibuat</th>
@@ -44,6 +45,14 @@
                     @foreach($users as $user)
                         <tr>
                             <td>{{ $user->id }}</td>
+                            <td>
+                                @if($user->gambar)
+                                    <img src="{{ asset('dist/img/' . $user->gambar) }}" alt="{{ $user->name }}"
+                                         class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                @else
+                                    <span class="badge bg-secondary">No Image</span>
+                                @endif
+                            </td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->created_at }}</td>
@@ -68,7 +77,7 @@
                         <div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form method="POST" action="{{ route('users.update', $user->id) }}">
+                                    <form method="POST" action="{{ route('users.update', $user->id) }}" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
                                         <div class="modal-header">
@@ -76,6 +85,22 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label>Gambar Profil</label>
+                                                <input type="file" name="gambar" class="form-control" accept="image/*"
+                                                       onchange="previewImage(event, 'previewEdit{{ $user->id }}')">
+                                                <small class="text-muted">Format: JPG, PNG, JPEG. Max: 2MB</small>
+                                                <div class="mt-2">
+                                                    @if($user->gambar)
+                                                        <img id="previewEdit{{ $user->id }}" src="{{ asset('dist/img/' . $user->gambar) }}"
+                                                             class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                                                        <p class="text-muted small mt-1">Gambar saat ini: {{ $user->gambar }}</p>
+                                                    @else
+                                                        <img id="previewEdit{{ $user->id }}" src="#" alt="Preview"
+                                                             class="img-thumbnail" style="max-width: 150px; max-height: 150px; display: none;">
+                                                    @endif
+                                                </div>
+                                            </div>
                                             <div class="mb-3">
                                                 <label>Nama</label>
                                                 <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
@@ -120,13 +145,23 @@
 <div class="modal fade" id="createUserModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ route('users.store') }}">
+            <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah User Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Gambar Profil</label>
+                        <input type="file" name="gambar" class="form-control" accept="image/*"
+                               onchange="previewImage(event, 'previewCreate')">
+                        <small class="text-muted">Format: JPG, PNG, JPEG. Max: 2MB</small>
+                        <div class="mt-2">
+                            <img id="previewCreate" src="#" alt="Preview"
+                                 class="img-thumbnail" style="max-width: 150px; max-height: 150px; display: none;">
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label>Nama</label>
                         <input type="text" name="name" class="form-control" required>
@@ -169,5 +204,22 @@
             autoWidth: false,
         });
     });
+
+    // Function untuk preview gambar sebelum upload
+    function previewImage(event, previewId) {
+        const input = event.target;
+        const preview = document.getElementById(previewId);
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 </script>
 @endpush
