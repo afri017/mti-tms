@@ -14,6 +14,10 @@ WORKDIR /var/www/html
 # Copy semua source code Laravel (termasuk artisan)
 COPY . .
 
+# Copy dan set permission untuk entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Jalankan composer install setelah semua file tersedia
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
 
@@ -23,19 +27,10 @@ RUN cp .env.example .env
 # Generate APP_KEY
 RUN php artisan key:generate
 
-# Create SQLite database dan jalankan migrations
-RUN touch database/database.sqlite \
-    && php artisan migrate --force
-
 # Set permissions untuk storage dan cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Jalankan optimisasi Laravel
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
 EXPOSE 8000
 
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD ["docker-entrypoint.sh"]
