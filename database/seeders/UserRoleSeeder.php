@@ -30,21 +30,30 @@ class UserRoleSeeder extends Seeder
         $adminRole->syncPermissions(Permission::all());
         $userRole->syncPermissions(['view customer', 'view product', 'view shipment']);
 
-        // 4️⃣ Buat user
-        $admin = User::firstOrCreate(
+        // 4️⃣ Buat user dengan updateOrCreate untuk ensure password correct
+        // Note: Password akan di-hash otomatis karena User model punya cast 'hashed'
+        $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
-            ['name' => 'Admin User', 'password' => bcrypt('password123')]
+            [
+                'name' => 'Admin User',
+                'password' => 'password123'
+            ]
         );
 
-        $user = User::firstOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'user@example.com'],
-            ['name' => 'Regular User', 'password' => bcrypt('password123')]
+            [
+                'name' => 'Regular User',
+                'password' => 'password123'
+            ]
         );
 
         // 5️⃣ Assign role ke user
-        $admin->assignRole($adminRole);
-        $user->assignRole($userRole);
+        $admin->syncRoles([$adminRole]);
+        $user->syncRoles([$userRole]);
 
         $this->command->info('✅ User, Role & Permission berhasil dibuat!');
+        $this->command->info('   Admin: admin@example.com / password123');
+        $this->command->info('   User: user@example.com / password123');
     }
 }
