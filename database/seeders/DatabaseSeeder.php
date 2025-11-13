@@ -16,6 +16,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
+            // Seed users, roles & permissions first
+            UserRoleSeeder::class,
+            RolePermissionSeeder::class,
+
+            // Then seed master data
             CustomerSeeder::class,
             MaterialSeeder::class,
             SourceSeeder::class,
@@ -29,11 +34,6 @@ class DatabaseSeeder extends Seeder
             TruckSeeder::class,
             GateSeeder::class,
             ShipmentCostSeeder::class,
-        ]);
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
         ]);
     }
 }

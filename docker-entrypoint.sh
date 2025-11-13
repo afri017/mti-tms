@@ -61,6 +61,18 @@ php artisan migrate --force || {
   echo "⚠️  Migration failed, but continuing..."
 }
 
+# Run seeders (only if tables are empty)
+echo "🌱 Checking if database needs seeding..."
+USER_COUNT=$(php artisan tinker --execute="echo App\Models\User::count();" 2>/dev/null | tail -1)
+if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+  echo "🌱 Running database seeders..."
+  php artisan db:seed --force || {
+    echo "⚠️  Seeding failed, but continuing..."
+  }
+else
+  echo "✅ Database already has data, skipping seeders..."
+fi
+
 # Clear all caches first
 echo "🧹 Clearing caches..."
 php artisan cache:clear || true
