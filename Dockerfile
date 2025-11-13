@@ -21,12 +21,6 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 # Jalankan composer install setelah semua file tersedia
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
 
-# Setup environment file
-RUN cp .env.example .env
-
-# Generate APP_KEY
-RUN php artisan key:generate
-
 # Set permissions untuk storage dan cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
