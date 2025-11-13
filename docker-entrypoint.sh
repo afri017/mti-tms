@@ -70,7 +70,11 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     echo "⚠️  Seeding failed, but continuing..."
   }
 else
-  echo "✅ Database already has data, skipping seeders..."
+  echo "✅ Database already has data, skipping full seed..."
+  echo "🔄 Running UserRoleSeeder to ensure correct passwords..."
+  php artisan db:seed --class=UserRoleSeeder --force || {
+    echo "⚠️  UserRoleSeeder failed, but continuing..."
+  }
 fi
 
 # Clear all caches first
