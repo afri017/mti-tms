@@ -40,12 +40,12 @@ class ShipmentCostController extends Controller
             'price_driver' => 'required|numeric',
             'validity_start' => 'required|date',
             'validity_end' => 'required|date|after_or_equal:validity_start',
-            'active' => 'nullable|in:Y,',
+            'active' => 'nullable|in:Y,N,',
         ]);
 
-        // Handle checkbox: convert empty string to null
+        // Handle checkbox: Y if checked, N if unchecked
         $data = $request->all();
-        $data['active'] = $request->input('active') === 'Y' ? 'Y' : null;
+        $data['active'] = $request->input('active') === 'Y' ? 'Y' : 'N';
 
         ShipmentCost::create($data);
 
@@ -71,12 +71,12 @@ class ShipmentCostController extends Controller
             'price_driver' => 'required|numeric',
             'validity_start' => 'required|date',
             'validity_end' => 'required|date|after_or_equal:validity_start',
-            'active' => 'nullable|in:Y,',
+            'active' => 'nullable|in:Y,N,',
         ]);
 
-        // Handle checkbox: convert empty string to null
+        // Handle checkbox: Y if checked, N if unchecked
         $data = $request->all();
-        $data['active'] = $request->input('active') === 'Y' ? 'Y' : null;
+        $data['active'] = $request->input('active') === 'Y' ? 'Y' : 'N';
 
         $shipmentCost = ShipmentCost::findOrFail($id);
         $shipmentCost->update($data);
