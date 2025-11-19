@@ -27,4 +27,9 @@ class Gate extends Model
     {
         return $this->hasMany(GateUsage::class, 'gate');
     }
+
+    public function gateus()
+    {
+        return $this->hasMany(GateUsage::class, 'gate', 'gate');
+    }
 }

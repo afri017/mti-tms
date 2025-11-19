@@ -19,6 +19,7 @@ use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\ReportController;
 
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -126,6 +127,12 @@ Route::get('/api/tracking/latest', [TrackingController::class, 'getLatest'])->na
 
 Route::get('/tracking/history', [TrackingController::class, 'history'])->name('tracking.history');
 Route::get('/api/tracking/history', [TrackingController::class, 'getHistory'])->name('tracking.history.data');
+
+Route::get('/report/pooutstanding', [ReportController::class, 'poOutstanding'])->name('report.pooutstanding');
+Route::get('/report/po-outstanding/data', [ReportController::class, 'poOutstandingData']);
+Route::get('/report/po-outstanding/export', [ReportController::class, 'exportOutstanding']);
+Route::get('/report/gates', [ReportController::class, 'gatesPage'])->name('report.gates');
+Route::get('/report/gates/data', [ReportController::class, 'gates'])->name('report.gates.data');
 
 
 });

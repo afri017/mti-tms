@@ -24,6 +24,15 @@ class GateUsage extends Model
         return $this->belongsTo(Gate::class, 'gate');
     }
 
+    public function gateud()
+    {
+        return $this->belongsTo(Gate::class, 'gate', 'gate');
+    }
+
+    public function shipment()
+    {
+        return $this->belongsTo(Shipment::class, 'noshipment', 'noshipment');
+    }
     // Relasi opsional jika dibutuhkan
     // public function gateRef()
     // {

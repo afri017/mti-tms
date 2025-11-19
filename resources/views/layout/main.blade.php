@@ -332,13 +332,13 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="pocust.html" class="nav-link">
+                <a href="{{ route('report.pooutstanding') }}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>OUTSTANDING PO CUSTOMER</p>
+                  <p>PO MONITORING</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="gatemonitor.html" class="nav-link">
+                <a href="{{ route('report.gates') }}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>GATE MONITORING</p>
                 </a>
