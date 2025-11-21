@@ -6,7 +6,7 @@
 
             <div class="card card-default">
                 <div class="card-header">
-                    <h4 class="card-title">{{ $pageTitle }}</h4>
+                    <h4 class="card-title">Gates Monitoring Report</h4>
                 </div>
 
                 <div class="card-body">

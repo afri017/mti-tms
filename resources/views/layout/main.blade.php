@@ -344,7 +344,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="truckmonitor.html" class="nav-link">
+                <a href="{{ route('report.truckmonitor') }}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>TRUCK MONITORING</p>
                 </a>
@@ -457,6 +457,7 @@
 <script src="{{ asset('plugins/jquery-mapael/jquery.mapael.min.js') }}"></script>
 <script src="{{ asset('plugins/jquery-mapael/maps/usa_states.min.js') }}"></script>
 <script src="{{ asset('plugins/chart.js/Chart.min.js') }}"></script>
+
 
 <!-- AdminLTE for demo purposes -->
 <script src="{{ asset('dist/js/demo.js') }}"></script>

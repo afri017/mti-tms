@@ -42,7 +42,7 @@
             {{-- CHART --}}
             <div class="row">
                 <div class="col-md-12">
-                    <canvas id="poChart" width="100%" height="40"></canvas>
+                    <canvas id="poChart" width="100%" height="30"></canvas>
                     <div id="chartDetail"
                             class="mt-3 p-3 border rounded bg-light"
                             style="display:none;">

@@ -11,6 +11,7 @@ use App\Models\DeliveryOrderItem;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\GateUsage;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Exports\OutstandingPOExport;
 use Yajra\DataTables\Facades\DataTables;
@@ -268,6 +269,82 @@ class ReportController extends Controller
             'pageTitle' => 'Report Gates',
             'sources'   => $sources,
             'gateOperational' => $gateOperational,
+        ]);
+    }
+
+    public function truckMonitor(Request $request)
+    {
+        // 1. Ambil tanggal filter
+        $startDate = $request->start_date
+            ? Carbon::parse($request->start_date)
+            : Carbon::now()->startOfMonth();
+
+        $endDate = $request->end_date
+            ? Carbon::parse($request->end_date)
+            : Carbon::now()->endOfMonth();
+
+        // 2. Generate labels (range tanggal)
+        $labels = [];
+        $period = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate->copy()->addDay());
+        foreach ($period as $date) {
+            $labels[] = $date->format('d M');
+        }
+
+        // 3. Query: total_qty, total_plan, total_actual
+        $data = DB::table('delivery_orders as a')
+            ->leftJoin('delivery_order_items as b', 'a.nodo', '=', 'b.nodo')
+            ->select(
+                'a.delivery_date',
+                DB::raw('SUM(b.qty_plan) AS total_qty'),
+                DB::raw('COUNT(DISTINCT a.noshipment) AS total_plan'),
+                DB::raw('COUNT(DISTINCT CASE WHEN a.checkin IS NOT NULL THEN a.noshipment END) AS total_actual')
+            )
+            ->whereBetween('a.delivery_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->groupBy('a.delivery_date')
+            ->orderBy('a.delivery_date')
+            ->get()
+            ->keyBy('delivery_date');
+
+        // 4. Mapping hasil DB ke chart array
+        $totalPlan = [];
+        $totalActual = [];
+        $totalQty = [];
+
+        foreach ($period as $date) {
+            $key = $date->format('Y-m-d');
+
+            $plan   = $data[$key]->total_plan   ?? 0;
+            $actual = $data[$key]->total_actual ?? 0;
+            $qty    = $data[$key]->total_qty    ?? 0;
+
+            $totalPlan[]   = $plan;
+            $totalActual[] = $actual;
+            $totalTon[]    = $qty / 1000;   // ← konversi ke Ton
+        }
+
+        // 5. KPI static (untuk sementara)
+        $kpi = [
+            'plan'      => array_sum($totalPlan),
+            'register'  => 13,
+            'hold'      => 0,
+            'waiting'   => 0,
+            'gate_in'   => 1,
+            'unloading' => 0,
+            'receipt'   => 0,
+            'gate_out'  => 10,
+            'progress'  => '76%',
+        ];
+
+        // 6. Kirim data ke Blade
+        return view('report.truckmonitor', [
+            'latest_sync' => now()->format('Y-m-d H:i:s'),
+            'labels'      => $labels,
+            'inbound'     => $totalPlan,      // total_plan
+            'outbound'    => $totalActual,    // total_actual
+            'kg'          => $totalTon,       // total_qty
+            'kpi'         => $kpi,
+            'startDate'   => $startDate->format('Y-m-d'),
+            'endDate'     => $endDate->format('Y-m-d'),
         ]);
     }
 }

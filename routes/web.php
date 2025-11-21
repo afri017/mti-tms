@@ -133,6 +133,7 @@ Route::get('/report/po-outstanding/data', [ReportController::class, 'poOutstandi
 Route::get('/report/po-outstanding/export', [ReportController::class, 'exportOutstanding']);
 Route::get('/report/gates', [ReportController::class, 'gatesPage'])->name('report.gates');
 Route::get('/report/gates/data', [ReportController::class, 'gates'])->name('report.gates.data');
+Route::get('/report/truckmonitor', [ReportController::class, 'truckMonitor'])->name('report.truckmonitor');
 
 
 });
