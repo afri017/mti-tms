@@ -514,6 +514,10 @@ async function toggleTripDetails(index, poNumber, material, capacity, totalTruck
         const defaultRoute = routeOptionsFiltered[0];
 
         let tripHTML = `
+        <div class="mb-2">
+            <label class="fw-bold">Tanggal Kirim (Semua Trip):</label>
+            <input type="date" id="global-date-${index}" class="form-control form-control-sm" />
+        </div>
             <table class="table table-bordered align-middle table-sm mb-0">
                 <thead class="table-primary text-center">
                     <tr>
@@ -532,6 +536,8 @@ async function toggleTripDetails(index, poNumber, material, capacity, totalTruck
         `;
 
         let totalLoaded = 0;
+        const today = new Date().toISOString().split('T')[0];
+        const globalToday = new Date().toISOString().split('T')[0];
 
         for (let t = 0; t < totalTruck; t++) {
             const tripNo = t + 1;
@@ -584,7 +590,11 @@ async function toggleTripDetails(index, poNumber, material, capacity, totalTruck
                     </td>
                     <td>${outstanding.toFixed(2)} MT</td>
                     <td>
-                        <input type="date" class="form-control form-control-sm schedule-date" />
+                    <input
+                        type="date"
+                        class="form-control form-control-sm schedule-date"
+                        value="${today}"
+                    />
                     </td>
                     <input type="hidden" class="trip-qty" value="${tripCapacity.toFixed(2)}" />
                 </tr>
@@ -603,6 +613,21 @@ async function toggleTripDetails(index, poNumber, material, capacity, totalTruck
 
         container.innerHTML = tripHTML;
         row.style.display = '';
+
+        const globalDateInput = document.getElementById(`global-date-${index}`);
+        if (globalDateInput) {
+
+            // Set default hari ini
+            globalDateInput.value = today;
+
+            // Apply perubahan ke semua row
+            globalDateInput.addEventListener('change', () => {
+                const newDate = globalDateInput.value;
+                container.querySelectorAll('.schedule-date').forEach(input => {
+                    input.value = newDate;
+                });
+            });
+        }
 
         // 🟢 Update driver otomatis saat ganti truck
         container.querySelectorAll('.truck-select').forEach(select => {

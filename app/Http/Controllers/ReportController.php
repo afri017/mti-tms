@@ -285,9 +285,11 @@ class ReportController extends Controller
 
         // 2. Generate labels (range tanggal)
         $labels = [];
+        $periodDates = [];
         $period = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate->copy()->addDay());
         foreach ($period as $date) {
             $labels[] = $date->format('d M');
+            $periodDates[] = $date->format('Y-m-d');
         }
 
         // 3. Query: total_qty, total_plan, total_actual
@@ -296,8 +298,11 @@ class ReportController extends Controller
             ->select(
                 'a.delivery_date',
                 DB::raw('SUM(b.qty_plan) AS total_qty'),
+                DB::raw('SUM(b.qty_receipt) AS total_receipt'),
                 DB::raw('COUNT(DISTINCT a.noshipment) AS total_plan'),
-                DB::raw('COUNT(DISTINCT CASE WHEN a.checkin IS NOT NULL THEN a.noshipment END) AS total_actual')
+                DB::raw('COUNT(DISTINCT CASE WHEN a.checkin IS NOT NULL THEN a.noshipment END) AS total_actual'),
+                DB::raw('COUNT(DISTINCT CASE WHEN a.receipt_date IS NOT NULL THEN a.noshipment END) AS total_receiptd'),
+                DB::raw('COUNT(DISTINCT CASE WHEN a.checkout IS NOT NULL THEN a.noshipment END) AS total_checkout')
             )
             ->whereBetween('a.delivery_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->groupBy('a.delivery_date')
@@ -309,42 +314,104 @@ class ReportController extends Controller
         $totalPlan = [];
         $totalActual = [];
         $totalQty = [];
+        $totalRcp = [];
+        $totalReceipt = [];
+        $totalCheckout = [];
 
         foreach ($period as $date) {
             $key = $date->format('Y-m-d');
 
             $plan   = $data[$key]->total_plan   ?? 0;
             $actual = $data[$key]->total_actual ?? 0;
+            $receipt = $data[$key]->total_receiptd ?? 0;
+            $checkout = $data[$key]->total_checkout ?? 0;
             $qty    = $data[$key]->total_qty    ?? 0;
+            $rcp    = $data[$key]->total_receipt    ?? 0;
 
             $totalPlan[]   = $plan;
             $totalActual[] = $actual;
+            $totalCheckout[] = $checkout;
+            $totalReceipt[] = $receipt;
             $totalTon[]    = $qty / 1000;   // ← konversi ke Ton
+            $totalRcp[]    = $rcp / 1000;   // ← konversi ke Ton
         }
+
+        $progress =  (array_sum($totalReceipt)) > 0
+        ? (array_sum($totalReceipt) / array_sum($totalPlan) * 100)
+        : 0;
+
+        $waiting = [];
+            foreach ($totalPlan as $i => $plan) {
+                $waiting[] = $plan - ($totalActual[$i] ?? 0);
+            }
 
         // 5. KPI static (untuk sementara)
         $kpi = [
             'plan'      => array_sum($totalPlan),
-            'register'  => 13,
-            'hold'      => 0,
-            'waiting'   => 0,
-            'gate_in'   => 1,
-            'unloading' => 0,
-            'receipt'   => 0,
-            'gate_out'  => 10,
-            'progress'  => '76%',
+            'register'  => array_sum($totalTon),
+            'hold'      => array_sum($totalTon) - array_sum($totalRcp),
+            'waiting'   => array_sum($totalPlan) - array_sum($totalActual),
+            'gate_in'   => array_sum($totalActual),
+            'unloading' => array_sum($totalReceipt),
+            'receipt'   => array_sum($totalRcp),
+            'gate_out'  => array_sum($totalCheckout),
+            'progress'  => number_format($progress, 2),
         ];
 
         // 6. Kirim data ke Blade
         return view('report.truckmonitor', [
             'latest_sync' => now()->format('Y-m-d H:i:s'),
             'labels'      => $labels,
+            'periodDates' => $periodDates,
             'inbound'     => $totalPlan,      // total_plan
             'outbound'    => $totalActual,    // total_actual
             'kg'          => $totalTon,       // total_qty
             'kpi'         => $kpi,
             'startDate'   => $startDate->format('Y-m-d'),
             'endDate'     => $endDate->format('Y-m-d'),
+            'gate_out'    => $totalCheckout,
+            'unloading'   => $totalReceipt,
+            'receipt'     => $totalRcp,
+            'waiting'     => $waiting,
         ]);
+    }
+
+    public function truckdetail(Request $request)
+    {
+        $date = $request->date;
+
+        $detail = DB::table('delivery_orders as a')
+            ->leftJoin('delivery_order_items as b', 'a.nodo', '=', 'b.nodo')
+            ->select(
+                'a.delivery_date',
+                'a.noshipment',
+                'a.checkin',
+                'a.checkout',
+                'a.start_loading',
+                'a.end_loading',
+                'a.receipt_date',
+                'a.tara_weight',
+                'a.gross_weight',
+                DB::raw('SUM(b.qty_plan) AS total_qty'),
+                DB::raw('SUM(b.qty_receipt) AS total_receipt'),
+                DB::raw('SUM(b.qty_act) AS total_act'),
+                DB::raw('SUM(b.qty_reject) AS total_reject')
+            )
+            ->whereDate('a.delivery_date', $date)
+            ->groupBy(
+                'a.delivery_date',
+                'a.noshipment',
+                'a.checkin',
+                'a.checkout',
+                'a.start_loading',
+                'a.end_loading',
+                'a.receipt_date',
+                'a.tara_weight',
+                'a.gross_weight'
+            )
+            ->orderBy('a.noshipment')
+            ->get();
+
+        return view('report.truckmonitor_detail', compact('detail'))->render();
     }
 }

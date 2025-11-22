@@ -14,8 +14,8 @@
             <!-- Filter Section -->
             <div class="mb-3">
                 <form class="form-inline">
-                    <input type="date" name="start_date" class="form-control mr-2" value="{{ request('start_date', '2025-08-01') }}">
-                    <input type="date" name="end_date" class="form-control mr-2"   value="{{ request('end_date', '2025-08-28') }}">
+                    <input type="date" name="start_date" class="form-control mr-2" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
+                    <input type="date" name="end_date" class="form-control mr-2"   value="{{ request('end_date', now()->format('Y-m-d')) }}">
                     <button type="submit" class="btn btn-warning">Filter</button>
                 </form>
             </div>
@@ -31,61 +31,99 @@
             <div class="d-flex mt-3" style="gap: 0.5rem;">
                 <div class="small-box bg-success text-center p-2 flex-fill">
                     <div class="inner">
-                        <h3>18</h3>
+                        <h3>{!! json_encode($kpi['plan']) !!}</h3>
                         <p>Plan</p>
-                    </div>
-                </div>
-                <div class="small-box bg-orange text-center p-2 flex-fill">
-                    <div class="inner">
-                        <h3>13</h3>
-                        <p>Register</p>
-                    </div>
-                </div>
-                <div class="small-box bg-warning text-center p-2 flex-fill">
-                    <div class="inner">
-                        <h3>0</h3>
-                        <p>Hold</p>
-                    </div>
-                </div>
-                <div class="small-box bg-danger text-center p-2 flex-fill">
-                    <div class="inner">
-                        <h3>0</h3>
-                        <p>Waiting</p>
                     </div>
                 </div>
                 <div class="small-box bg-info text-center p-2 flex-fill">
                     <div class="inner">
-                        <h3>1</h3>
+                        <h3>{!! json_encode($kpi['gate_in']) !!}</h3>
                         <p>Gate-In</p>
                     </div>
                 </div>
-                <div class="small-box bg-success-light text-center p-2 flex-fill">
+                <div class="small-box bg-danger text-center p-2 flex-fill">
                     <div class="inner">
-                        <h3>0</h3>
-                        <p>Unloading</p>
-                    </div>
-                </div>
-                <div class="small-box bg-success-dark text-center p-2 flex-fill">
-                    <div class="inner">
-                        <h3>0</h3>
-                        <p>Receipt</p>
+                        <h3>{!! json_encode($kpi['waiting']) !!}</h3>
+                        <p>Waiting</p>
                     </div>
                 </div>
                 <div class="small-box bg-teal text-center p-2 flex-fill">
                     <div class="inner">
-                        <h3>10</h3>
+                        <h3>{!! json_encode($kpi['gate_out']) !!}</h3>
                         <p>Gate-Out</p>
+                    </div>
+                </div>
+                <div class="small-box bg-lightblue text-center p-2 flex-fill">
+                    <div class="inner">
+                        <h3>{!! json_encode($kpi['unloading']) !!}</h3>
+                        <p>Unloading Depo</p>
+                    </div>
+                </div>
+                <div class="small-box bg-orange text-center p-2 flex-fill">
+                    <div class="inner">
+                        <h3>{!! json_encode($kpi['register']) !!}</h3>
+                        <p>Delivery in (Ton)</p>
+                    </div>
+                </div>
+                <div class="small-box bg-warning text-center p-2 flex-fill">
+                    <div class="inner">
+                        <h3>{!! json_encode($kpi['hold']) !!}</h3>
+                        <p>Good In Transit</p>
+                    </div>
+                </div>
+                <div class="small-box bg-navy text-center p-2 flex-fill">
+                    <div class="inner">
+                        <h3>{!! json_encode($kpi['receipt']) !!}</h3>
+                        <p>Receipt in (Ton)</p>
                     </div>
                 </div>
                 <div class="small-box bg-pink text-center p-2 flex-fill">
                     <div class="inner">
-                        <h3>76%</h3>
+                        <h3>{{ $kpi['progress'] }}%</h3>
                         <p>Progress</p>
                     </div>
                 </div>
             </div>
 
+            <!-- Data Table -->
+            <div class="card card-dark mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Daily Plan Truck Monitor</h5>
+                </div>
+                <div class="card-body">
+                    <table id="truck-table" class="table table-bordered table-striped table-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th></th> {{-- tombol expand --}}
+                                <th>Tanggal</th>
+                                <th>Plan</th>
+                                <th>Gate-In</th>
+                                <th>Gate-Out</th>
+                                <th>Unloading</th>
+                                <th>Waiting</th>
+                                <th>Tonase Plan</th>
+                                <th>Tonase Receipt</th>
+                            </tr>
+                        </thead>
 
+                        <tbody>
+                            @foreach ($labels as $i => $tanggal)
+                                <tr data-date="{{ $periodDates[$i] }}"">
+                                    <td class="details-control text-center" style="cursor:pointer;">➕</td>
+                                    <td>{{ $tanggal }}</td>
+                                    <td>{{ $inbound[$i] ?? 0 }}</td>
+                                    <td>{{ $outbound[$i] ?? 0 }}</td>
+                                    <td>{{ $gate_out[$i] ?? 0 }}</td>
+                                    <td>{{ $unloading[$i] ?? 0 }}</td>
+                                    <td>{{ $waiting[$i] ?? 0 }}</td>
+                                    <td>{{ number_format($kg[$i] ?? 0, 2) }}</td>
+                                    <td>{{ number_format($receipt[$i] ?? 0, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -146,5 +184,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+</script>
+<script>
+let table;
+
+$(document).ready(function () {
+
+    table = $('#truck-table').DataTable({
+        responsive: true,
+        pageLength: 15,
+        ordering: true
+    });
+
+    $('#truck-table tbody').on('click', 'td.details-control', function () {
+
+        let tr  = $(this).closest('tr');
+        let row = table.row(tr);
+
+        // Jika sedang terbuka → tutup dan selesai
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass('shown');
+            $(this).text('➕');
+            return; // <-- STOP di sini
+        }
+
+        // Jika belum terbuka → expand & load
+        row.child('<div class="p-2">Loading...</div>').show();
+        tr.addClass('shown');
+        $(this).text('➖');
+
+        let tanggal = tr.data('date');
+
+        $.ajax({
+            url: "/report/truckmonitor/detail",
+            type: "GET",
+            data: { date: tanggal },
+            success: function (html) {
+                row.child(html).show();
+            }
+        });
+    });
+
+});
+
 </script>
 @endpush
